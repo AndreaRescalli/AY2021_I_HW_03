@@ -27,6 +27,7 @@
     } RGB_struct; 
     
     // Declaration of function that acquires a packet of data
+    void acquire_data(uint8 *array);
     
     // Declaration of functions that will perform analysis and control on the input bytes
     void idle(uint8 *data);

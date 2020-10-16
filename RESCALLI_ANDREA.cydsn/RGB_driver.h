@@ -19,7 +19,7 @@
     #include "UART_driver.h"
     
     // Declaration of function that will drive the RGB
-    void pwm_rgb(RGB_struct RGB);
+    //void pwm_rgb(RGB_struct RGB);
     void PWM_Start(void);
     
 #endif

@@ -14,7 +14,7 @@
 #include "project.h"
 #include "My_InterruptRoutines.h"
 #include "UART_driver.h"
-#include "RGB_driver.h"
+//#include "RGB_driver.h"
 #include <stdio.h>
 
 // Defines
@@ -43,52 +43,58 @@ int main(void)
     CyGlobalIntEnable; /* Enable global interrupts. */
     // Enable ISRs
     isr_UART_StartEx(Custom_UART_RX_ISR);
-    isr_TIMER_StartEx(Custom_TIMER_ISR);
+    //isr_TIMER_StartEx(Custom_TIMER_ISR);
     // Start UART
     UART_Start();
+    UART_EnableRxInt();
     // Start Timer
-    Timer_Start();
+    //Timer_Start();
     // Start PWM
-    PWM_Start();
+    //PWM_Start();
+    
+    
+    UART_PutString("Enter RGB piloting commands (hex)\r\n");
 
 
     for(;;)
     {
-           
-        if (state == IDLE_STATE) {
-            idle(packet);
-        }
-            
-        else if (state == HEADER_STATE) {
-            check_header(packet);
-        }
-            
-        else if (state == RED_STATE) {
-            packet[state] = check_red(rgb_values, recieved);
-        }
-            
-        else if (state == GREEN_STATE) {
-            packet[state] = check_green(rgb_values, recieved);
-        }
-            
-        else if (state == BLUE_STATE) {
-            packet[state] = check_blue(rgb_values, recieved);
-        }
-            
-        else if (state == TAIL_STATE) {
-            check_tail(packet[state-1]);
-        }    
-                
         
-        if (flag_rgb) {
+        acquire_data(packet);
         
-            // Pilot the PWM based on the values recieved
-            pwm_rgb(rgb_values);
-            flag_rgb = 0;
-        
-        } // end rgb if
-        
-        
+//        if (state == IDLE_STATE) {
+//            idle(packet);
+//        }
+//            
+//        else if (state == HEADER_STATE) {
+//            check_header(packet);
+//        }
+//            
+//        else if (state == RED_STATE) {
+//            packet[state] = check_red(rgb_values, recieved);
+//        }
+//            
+//        else if (state == GREEN_STATE) {
+//            packet[state] = check_green(rgb_values, recieved);
+//        }
+//            
+//        else if (state == BLUE_STATE) {
+//            packet[state] = check_blue(rgb_values, recieved);
+//        }
+//            
+//        else if (state == TAIL_STATE) {
+//            check_tail(packet[state-1]);
+//        }    
+//                
+//        
+//        if (flag_rgb) {
+//        
+//            // Pilot the PWM based on the values recieved
+//            pwm_rgb(rgb_values);
+//            flag_rgb = 0;
+//        
+//        } // end rgb if
+//        
+//        
     } // end for
     
 } // end main

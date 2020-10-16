@@ -19,7 +19,7 @@
     CY_ISR_PROTO(Custom_UART_RX_ISR);
     
     // ISR declaration for TIMER
-    CY_ISR_PROTO(Custom_TIMER_ISR);
+    //CY_ISR_PROTO(Custom_TIMER_ISR);
     
 #endif
 
