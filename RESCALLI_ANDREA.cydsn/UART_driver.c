@@ -9,68 +9,155 @@
  *
  * ========================================
 */
-
-// Includes
-#include "UART_driver.h"
-#include <stdio.h>
-
-// Defines
-#define IDLE_STATE   0
-#define HEADER_STATE 1
-#define RED_STATE    2
-#define GREEN_STATE  3
-#define BLUE_STATE   4
-#define TAIL_STATE   5
-
-#define HEADER 0xA0
-#define TAIL   0xC0
-
-// Globals
-extern char recieved;
-extern uint8 state;
-extern uint8 flag_rx;
-extern uint8 flag_five_sec;
-extern uint8 counter_timer;
-extern uint8 flag_rgb;
-extern RGB_struct rgb_values;
-uint8 dim = 0;
-uint8 rx = 0;
-uint8 i = 0;
-char message_1[5] = {'\0'};
-char message_2[20] = {'\0'};
-
-
-
-
-// Function that acquires the packet recieved by the PSoC via UART protocol
-void acquire_data(uint8 *array) {
-    
-    if (flag_rx) {
-        
-        while(UART_GetRxBufferSize()) {
-        
-            array[i] = UART_ReadRxData();
-            sprintf(message_2, "%i\r\n", array[i]);
-            UART_PutString(message_2);
-            i++;
-        
-        }
-        
-//        dim = UART_GetRxBufferSize();
-//        sprintf(message_1, "%i\r\n", dim);
-//        UART_PutString(message_1);
+//
+//// Includes
+//#include "UART_driver.h"
+//#include <stdio.h>
+//
+//// Defines
+//#define IDLE_STATE   0
+//#define HEADER_STATE 1
+//#define RED_STATE    2
+//#define GREEN_STATE  3
+//#define BLUE_STATE   4
+//#define TAIL_STATE   5
+//
+//#define HEADER 0xA0
+//#define TAIL   0xC0
+//
+//// Globals
+//extern char recieved;
+//extern uint8 dim;
+//extern uint8 state;
+//extern uint8 flag_rx;
+//extern uint8 flag_five_sec;
+//extern uint8 counter_timer;
+//extern uint8 flag_rgb;
+//extern RGB_struct rgb_values;
+//uint8 dim = 0;
+//uint8 rx = 0;
+//uint8 i = 0;
+//char bytes_acquired[20] = {'\0'};
+//char acquired_data[20] = {'\0'};
+//
+//char header[20] = {'\0'};
+//uint8 header_val = 0;
+//
+//char red[20] = {'\0'};
+//uint8 red_val = 0;
+//
+//char green[20] = {'\0'};
+//uint8 green_val = 0;
+//
+//char blue[20] = {'\0'};
+//uint8 blue_val = 0;
+//
+//char tail[20] = {'\0'};
+//uint8 tail_val = 0;
+//
+//
+//
+//
+//// Function that acquires the packet recieved by the PSoC via UART protocol
+//void acquire_data(uint8 *array) {
+//    
+//    if (flag_rx) {
 //        
-//        for (uint8 i=0; i<dim; i++) {
-//            array[i] = UART_ReadRxData();
-//            sprintf(message_2, "%i\r\n", array[i]);
-//            UART_PutString(message_2);
+//        // If we have data in the RX BUFFER we acquire them
+//        while(UART_GetRxBufferSize()) {
+//            
+//            array[i] = UART_GetChar();
+//            //sprintf(acquired_data, "%i \r\n", array[i]);
+//            //UART_PutString(acquired_data);
+//            i++;
+//            
+//            // Check on the number of inputs. The packet must have a specifc length
+//            if (i>5) {
+//                UART_PutString("Error: too many inputs\r\n");
+//                i = 0;
+//                flag_rx = 0;
+//                return;
+//            }
+//            
 //        }
-        
-        flag_rx = 0;
-        
-    }
-    
-}
+//        
+//        // Get info on how many bytes we have recieved
+//        sprintf(bytes_acquired, "Bytes acquired: %i\r\n", i);
+//        UART_PutString(bytes_acquired);
+//        
+//        if (i<5) {
+//            
+//            // New data has to be acquired
+//            switch(i) {
+//                case 1:
+//                    // Only header has been acquired
+//                    UART_PutString("Enter RGB and tail\r\n");
+//                    flag_rx = 0;
+//                    break;
+//                case 2:
+//                    // Only header and RED have been acquired
+//                    UART_PutString("Enter GB and tail\r\n");
+//                    flag_rx = 0;
+//                    break;
+//                case 3:
+//                    // BLUE and tail are missing
+//                    UART_PutString("Enter B and tail\r\n");
+//                    flag_rx = 0;
+//                    break;
+//                case 4: 
+//                    // Only tail is missing
+//                    UART_PutString("Enter tail\r\n");
+//                    flag_rx = 0;
+//                    break;
+//                default:
+//                    // Error
+//                    UART_PutString("Error, please re-enter full package\r\n");
+//                    i = 0;
+//                    flag_rx = 0;
+//                    break;
+//            }
+//            
+//        }
+//        else { // If we have acquired 5 bytes
+//        
+//            if (array[0] == HEADER) {
+//                header_val = array[0];
+//                sprintf(header, "HEADER: %i\r\n", header_val);
+//                UART_PutString(header);
+//            }
+//            
+//            if (array[1] == 0xFF) {
+//                red_val = array[1];
+//                sprintf(red, "RED:    %i\r\n", red_val);
+//                UART_PutString(red);
+//            }
+//            
+//            if (array[2] == 0xFF) {
+//                green_val = array[2];
+//                sprintf(green, "GREEN:  %i\r\n", green_val);
+//                UART_PutString(green);
+//            }
+//             
+//            if (array[3] == 0xFF) {
+//                blue_val = array[3];
+//                sprintf(blue, "BLUE:   %i\r\n", blue_val);
+//                UART_PutString(blue);
+//            }
+//             
+//            if (array[4] == TAIL) {
+//                tail_val = array[4];
+//                sprintf(tail, "TAIL:   %i\r\n", tail_val);
+//                UART_PutString(tail);
+//            }
+//            
+//            i = 0;
+//            flag_rx = 0;
+//            
+//        }
+//        
+//    }
+//    
+//}
 //
 //
 //// Function that represents the idle state (basically it waits for data and checks the header)

@@ -19,7 +19,8 @@ extern uint8 flag_five_sec;
 extern uint8 counter_timer;
 extern uint8 dim;
 
-//static char message[20] = {'\0'};
+// Added
+#define PACKAGE_LENGTH 5
 
 // Body of UART ISR based on the reception of a byte
 CY_ISR(Custom_UART_RX_ISR) {
@@ -31,9 +32,12 @@ CY_ISR(Custom_UART_RX_ISR) {
 //        flag_rx = 1;
 //    }
     
+    // Added
+    UART_ReadRxStatus();
+    
     dim = UART_GetRxBufferSize();
     // If we have recieved data
-    if (dim) {
+    if (dim >= PACKAGE_LENGTH) {
         flag_rx = 1;
     }
     
