@@ -12,6 +12,7 @@
 
 // Includes
 #include "TIMER_ISR.h"
+#include "Timer.h"
 
 // Globals
 extern uint8 counter_timer;
@@ -27,6 +28,9 @@ CY_ISR(Custom_TIMER_ISR) {
         flag_five_sec = 1;
         counter_timer = 0;
     }
+    
+    // Read timer status to bring interrupt line low
+    Timer_ReadStatusRegister();
 
 }
 

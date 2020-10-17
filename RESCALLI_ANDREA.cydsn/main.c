@@ -71,11 +71,14 @@ int main(void)
         
         if(flag_rx) {
             
+            // Reset the timer
+            reset_timer();
+            
             // Update state
             state++;
             
             // Acquire data and communicate it
-            check = UART_GetChar();
+            check = UART_ReadRxData();
             flag_rx = 0;
             sprintf(recieved, "Byte recieved: %i\r\n", check);
             UART_PutString(recieved);
@@ -131,9 +134,24 @@ int main(void)
                     // We're in IDLE
                     break;
                     
-                } // end switch-case
+            } // end switch-case
            
         } // end if(flag_rx)
+        
+        // When we're not in IDLE or TAIL, we have a time window within which we can accept bytes
+        if(state == HEAD || state == RED || state == GREEN || state == BLUE) {
+            if(flag_five_sec) {
+                // 5s timeout has occurred. We have to discard data and get back to IDLE state
+                UART_PutString("Timeout. Re-send packet\r\n");
+                buffer[0] = 0;
+                buffer[1] = 0;
+                buffer[2] = 0;
+                buffer[3] = 0;
+                buffer[4] = 0;
+                flag_five_sec = 0;
+                state = IDLE;
+            }
+        }
         
         if(flag_packet) {
 
@@ -147,7 +165,7 @@ int main(void)
             UART_PutString("\r\n");
             UART_PutString("---------------------------\r\n");
             UART_PutString("\r\n");
-            UART_PutString("RGB components:\r\n");
+            UART_PutString("RGB updated:\r\n");
             sprintf(red_val, "RED:    %i\r\n", buffer[1]);
             UART_PutString(red_val);
             
