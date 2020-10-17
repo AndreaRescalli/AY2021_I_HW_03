@@ -13,7 +13,10 @@
 // Includes
 #include "project.h"
 #include "UART_ISR.h"
+#include "TIMER_ISR.h"
+#include "Utilities.h"
 #include <stdio.h>
+
 
 // Defines
 #define PACKET_SIZE 5
@@ -32,6 +35,9 @@
 // Globals
 uint8 flag_rx = 0;
 uint8 flag_packet = 0;
+uint8 flag_five_sec = 0;
+uint8 counter_timer = 0;;
+
 uint8 check = 0;
 uint8 buffer[PACKET_SIZE] = {0};
 uint8 state = IDLE;
@@ -46,14 +52,15 @@ char blue_val[25] = {'\0'};
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
-    // Enable ISR
+    // Enable ISRs
     isr_UART_StartEx(Custom_UART_RX_ISR);
+    isr_TIMER_StartEx(Custom_TIMER_ISR);
     // Start UART
     UART_Start();
+    // Start TIMER
+    Timer_Start();
     // Start PWM
-    PWM_Red_Start();
-    PWM_Green_Start();
-    PWM_Blue_Start();    
+    PWM_Start();    
     
     // Init command
     UART_PutString("Please, send header byte\r\n");
