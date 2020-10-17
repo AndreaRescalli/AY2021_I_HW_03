@@ -10,19 +10,12 @@
  * ========================================
 */
 
-#ifndef __RGB_DRIVER_H__
-    
-    #define __RGB_DRIVER_H__
-    
-    // Includes
-    #include "project.h"
-    #include "UART_driver.h"
-    
-    // Declaration of function that will drive the RGB
-    //void pwm_rgb(RGB_struct RGB);
-    void PWM_Start(void);
-    
-#endif
+#ifndef __UART_ISR_H__
+    #define __UART_ISR_H__
 
+    #include "cytypes.h"
+    
+    CY_ISR_PROTO(Custom_UART_RX_ISR);
+#endif
 
 /* [] END OF FILE */

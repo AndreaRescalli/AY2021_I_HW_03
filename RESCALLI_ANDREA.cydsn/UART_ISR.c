@@ -10,17 +10,20 @@
  * ========================================
 */
 
-#ifndef __MY_INTERRUPT_ROUTINES_H__
-    #define __MY_INTERRUPT_ROUTINES_H__
+// Includes
+#include "UART_ISR.h"
+#include "UART.h"
 
-    #include "cytypes.h"
+// Globals
+extern uint8 flag_rx;
+
+CY_ISR(Custom_UART_RX_ISR) {
+
+    // Check UART status
+    if(UART_ReadRxStatus() == UART_RX_STS_FIFO_NOTEMPTY) {
+        flag_rx = 1;
+    }
     
-    // ISR declaration for UART
-    CY_ISR_PROTO(Custom_UART_RX_ISR);
-    
-    // ISR declaration for TIMER
-    //CY_ISR_PROTO(Custom_TIMER_ISR);
-    
-#endif
+}
 
 /* [] END OF FILE */

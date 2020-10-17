@@ -12,158 +12,168 @@
 
 // Includes
 #include "project.h"
-#include "My_InterruptRoutines.h"
-#include "UART_driver.h"
-//#include "RGB_driver.h"
+#include "UART_ISR.h"
 #include <stdio.h>
 
 // Defines
-#define IDLE_STATE   0
-#define HEADER_STATE 1
-#define RED_STATE    2
-#define GREEN_STATE  3
-#define BLUE_STATE   4
-#define TAIL_STATE   5
+#define PACKET_SIZE 5
 
-#define PACKET_SIZE  5
+#define IDLE  0
+#define HEAD  1
+#define RED   2
+#define GREEN 3
+#define BLUE  4
+#define TAIL  5
 
-
-
-// Added
-#define HEADER 0xA0
-#define TAIL   0xC0
-
-
+#define HEADER_BYTE 0xA0
+#define TAIL_BYTE   0xC0
 
 
 // Globals
-uint8 flag_rx = 0;                  // flag for the UART rx
-uint8 counter_timer = 0;            // counts the overflows of the timer
-uint8 flag_five_sec = 0;            // flag to inform 5 seconds have passed
-uint8 recieved = 0;                 // recieved byte
-uint8 state = IDLE_STATE;           // variable that keeps track of the state of the decoding process
-uint8 flag_rgb = 0;                 // flag to inform the reception was successful
-RGB_struct rgb_values = {0, 0, 0};  // struct that will preserve the recieved values for the RGB channels
-uint8 packet[PACKET_SIZE] = {0};    // array in which we store the input packet
+uint8 flag_rx = 0;
+uint8 flag_packet = 0;
+uint8 check = 0;
+uint8 buffer[PACKET_SIZE] = {0};
+uint8 state = IDLE;
 
+char recieved[25] = {'\0'};
+char red_val[25] = {'\0'};
+char green_val[25] = {'\0'};
+char blue_val[25] = {'\0'};
 
-
-// Added
-char header[20] = {'\0'};
-uint8 header_val = 0;
-
-char red[20] = {'\0'};
-uint8 red_val = 0;
-
-char green[20] = {'\0'};
-uint8 green_val = 0;
-
-char blue[20] = {'\0'};
-uint8 blue_val = 0;
-
-char tail[20] = {'\0'};
-uint8 tail_val = 0;
-
-uint8 dim = 0;
 
 
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
-    // Enable ISRs
+    // Enable ISR
     isr_UART_StartEx(Custom_UART_RX_ISR);
-    //isr_TIMER_StartEx(Custom_TIMER_ISR);
     // Start UART
     UART_Start();
-    UART_EnableRxInt();
-    // Start Timer
-    //Timer_Start();
     // Start PWM
-    //PWM_Start();
+    PWM_Red_Start();
+    PWM_Green_Start();
+    PWM_Blue_Start();    
     
-    
-    UART_PutString("Enter RGB piloting commands (hex)\r\n");
+    // Init command
+    UART_PutString("Please, send header byte\r\n");
 
 
     for(;;)
     {
         
-        // commented now acquire_data(packet);
-        // Added
-        int i = 0;
-        if (flag_rx) {
-            for (i=0; i<PACKET_SIZE;i++) {
-                packet[i] = (uint8) (UART_GetByte() & 0x00FF);
-            }
-            UART_ClearRxBuffer();
+        if(flag_rx) {
             
-            if (packet[0] == HEADER) {
-                header_val = packet[0];
-                sprintf(header, "HEADER: %i\r\n", header_val);
-                UART_PutString(header);
-            }
+            // Update state
+            state++;
             
-            //if (packet[1] == 0xFF) {
-                red_val = packet[1];
-                sprintf(red, "RED:    %i\r\n", red_val);
-                UART_PutString(red);
-            //}
-            
-            //if (packet[2] == 0xFF) {
-                green_val = packet[2];
-                sprintf(green, "GREEN:  %i\r\n", green_val);
-                UART_PutString(green);
-            //}
-             
-            //if (packet[3] == 0xFF) {
-                blue_val = packet[3];
-                sprintf(blue, "BLUE:   %i\r\n", blue_val);
-                UART_PutString(blue);
-            //}
-             
-            if (packet[4] == TAIL) {
-                tail_val = packet[4];
-                sprintf(tail, "TAIL:   %i\r\n", tail_val);
-                UART_PutString(tail);
-            }
-            
+            // Acquire data and communicate it
+            check = UART_GetChar();
             flag_rx = 0;
-        }
+            sprintf(recieved, "Byte recieved: %i\r\n", check);
+            UART_PutString(recieved);
+            
+            switch(state) {
+                
+                case HEAD:
+                    if(check == HEADER_BYTE) {
+                        // We accept the byte 
+                        buffer[state-1] = check;
+                        UART_PutString("Please, send RED (hex)\r\n");
+                    }
+                    else {
+                        UART_PutString("Header byte not correct. Re-send byte\r\n");
+                        state = IDLE;
+                    }
+                    break;
+            
+                case RED: 
+                    buffer[state-1] = check;
+                    UART_PutString("Please, send GREEN (hex)\r\n");
+                    break;
+            
+                case GREEN:
+                    buffer[state-1] = check;
+                    UART_PutString("Please, send BLUE (hex)\r\n");
+                    break;
+                
+                case BLUE:
+                    buffer[state-1] = check;
+                    UART_PutString("Please, send tail byte\r\n");
+                    break;
+               
+                case TAIL:
+                    if(check == TAIL_BYTE) {
+                        buffer[state-1] = check;
+                        flag_packet = 1;
+                        state = IDLE;
+                    }
+                    else {
+                        UART_PutString("Tail byte not correct. Re-send packet\r\n");
+                        // Reset the buffer
+                        buffer[0] = 0;
+                        buffer[1] = 0;
+                        buffer[2] = 0;
+                        buffer[3] = 0;
+                        buffer[4] = 0;
+                        state = IDLE;
+                    }
+                    break;
+                    
+                default:
+                    // We're in IDLE
+                    break;
+                    
+                } // end switch-case
+           
+        } // end if(flag_rx)
         
-//        if (state == IDLE_STATE) {
-//            idle(packet);
-//        }
-//            
-//        else if (state == HEADER_STATE) {
-//            check_header(packet);
-//        }
-//            
-//        else if (state == RED_STATE) {
-//            packet[state] = check_red(rgb_values, recieved);
-//        }
-//            
-//        else if (state == GREEN_STATE) {
-//            packet[state] = check_green(rgb_values, recieved);
-//        }
-//            
-//        else if (state == BLUE_STATE) {
-//            packet[state] = check_blue(rgb_values, recieved);
-//        }
-//            
-//        else if (state == TAIL_STATE) {
-//            check_tail(packet[state-1]);
-//        }    
-//                
-//        
-//        if (flag_rgb) {
-//        
-//            // Pilot the PWM based on the values recieved
-//            pwm_rgb(rgb_values);
-//            flag_rgb = 0;
-//        
-//        } // end rgb if
-//        
-//        
+        if(flag_packet) {
+
+            /*
+             * Write the right compare value for each channel.
+             * REMEMBER: Channels are active if PWM is low, since the RGB is in common anode configuration --> PWM set as 'Less or Equal'
+             * For this reason, the compare setting has to be set as 255 - input (for example, if we want black we have to set (255-0,255-0,255-0); 
+             * in this way we put the PWM all HIGH and the RGB channel is always off).
+            */
+            
+            UART_PutString("\r\n");
+            UART_PutString("---------------------------\r\n");
+            UART_PutString("\r\n");
+            UART_PutString("RGB components:\r\n");
+            sprintf(red_val, "RED:    %i\r\n", buffer[1]);
+            UART_PutString(red_val);
+            
+            // Pilot RED PWM
+            PWM_Red_WriteCompare(255 - buffer[1]);
+
+            sprintf(green_val, "GREEN:  %i\r\n", buffer[2]);
+            UART_PutString(green_val);
+            
+            // Pilot GREEN PWM
+            PWM_Green_WriteCompare(255 - buffer[2]);
+
+            sprintf(blue_val, "BLUE:   %i\r\n", buffer[3]);
+            UART_PutString(blue_val);
+            UART_PutString("\r\n");
+            UART_PutString("---------------------------\r\n");
+            UART_PutString("\r\n");
+            
+            // Pilot BLUE PWM
+            PWM_Blue_WriteCompare(255 - buffer[3]);
+            
+            flag_packet = 0;
+            // Reset the buffer and get ready for new acquisition
+            buffer[0] = 0;
+            buffer[1] = 0;
+            buffer[2] = 0;
+            buffer[3] = 0;
+            buffer[4] = 0;
+            state = IDLE;
+            UART_PutString("Please, send header byte\r\n");
+            
+        }
+               
     } // end for
     
 } // end main
