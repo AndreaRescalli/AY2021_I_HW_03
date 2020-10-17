@@ -62,6 +62,20 @@ void acquire_byte(uint8 *buffer) {
         sprintf(recieved, "Byte recieved: %i\r\n", check);
         UART_PutString(recieved);
         
+        // Special character can be typed at any time
+        if(check == 'v') {
+            // Reset the buffer
+            buffer[0] = 0;
+            buffer[1] = 0;
+            buffer[2] = 0;
+            buffer[3] = 0;
+            buffer[4] = 0;
+            state = IDLE;
+            
+            // Display special message
+            UART_PutString("RGB LED Program $$$\r\n");
+        }
+        
         switch(state) {
             
             case HEAD:
