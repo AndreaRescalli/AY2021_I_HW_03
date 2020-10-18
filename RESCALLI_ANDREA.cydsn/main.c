@@ -1,11 +1,21 @@
 /* ========================================
  *
- * Copyright YOUR COMPANY, THE YEAR
+ * Copyright LTEBS srl, 2020
  * All Rights Reserved
  * UNPUBLISHED, LICENSED SOFTWARE.
  *
  * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
+ * WHICH IS THE PROPERTY OF LTEBS srl.
+ *
+ * \file  main.c
+ * \brief Main source file for the Assignment_3
+ *
+ * Sets the colour of an (external) RGB LED according to a packet of data sent to the PSoC.
+ * UART_PutString commands are commented so that the code can work with the GUI. If PSoC is piloted
+ * with CoolTerm, they can be un-commented and they guide the user throughout the procedure.
+ *
+ * \author: Andrea Rescalli
+ * \date:   20/10/2020 
  *
  * ========================================
 */
@@ -44,11 +54,6 @@ uint8 check = 0;
 uint8 buffer[PACKET_SIZE] = {0};
 uint8 state = IDLE;
 
-//char recieved[25] = {'\0'};
-//char red_val[25] = {'\0'};
-//char green_val[25] = {'\0'};
-//char blue_val[25] = {'\0'};
-
 
 
 int main(void)
@@ -65,7 +70,7 @@ int main(void)
     PWM_Start();    
     
     // Init command
-    UART_PutString("Please, send header byte\r\n");
+    //UART_PutString("Please, send header byte\r\n");
 
 
     for(;;)

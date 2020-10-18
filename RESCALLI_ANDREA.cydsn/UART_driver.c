@@ -1,11 +1,21 @@
 /* ========================================
  *
- * Copyright YOUR COMPANY, THE YEAR
+ * Copyright LTEBS srl, 2020
  * All Rights Reserved
  * UNPUBLISHED, LICENSED SOFTWARE.
  *
  * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
+ * WHICH IS THE PROPERTY OF LTEBS srl.
+ *
+ * \file  UART_driver.c
+ * \brief Driver file for the Assignment_3 that exploits UART to acquire a packet of data
+ *
+ * Sets the colour of an (external) RGB LED according to a packet of data sent to the PSoC.
+ * UART_PutString commands are commented so that the code can work with the GUI. If PSoC is piloted
+ * with CoolTerm, they can be un-commented and they guide the user throughout the procedure.
+ *
+ * \author: Andrea Rescalli
+ * \date:   20/10/2020
  *
  * ========================================
 */
@@ -42,7 +52,7 @@ extern uint8 state;
 extern uint8 check;
 
 
-char recieved[25] = {'\0'};
+//char recieved[25] = {'\0'};
 
 
 // Definition of function that handles incoming bytes
@@ -59,8 +69,8 @@ void acquire_byte(uint8 *buffer) {
         // Acquire data and communicate it
         check = UART_ReadRxData();
         flag_rx = 0;
-        sprintf(recieved, "Byte recieved: %i\r\n", check);
-        UART_PutString(recieved);
+        //sprintf(recieved, "Byte recieved: %i\r\n", check);
+        //UART_PutString(recieved);
         
         // Special character can be typed at any time
         if(check == 'v') {
@@ -82,27 +92,27 @@ void acquire_byte(uint8 *buffer) {
                 if(check == HEADER_BYTE) {
                     // We accept the byte 
                     buffer[state-1] = check;
-                    UART_PutString("Please, send RED (hex)\r\n");
+                    //UART_PutString("Please, send RED (hex)\r\n");
                 }
                 else {
-                    UART_PutString("Header byte not correct. Re-send byte\r\n");
+                    //UART_PutString("Header byte not correct. Re-send byte\r\n");
                     state = IDLE;
                 }
                 break;
         
             case RED: 
                 buffer[state-1] = check;
-                UART_PutString("Please, send GREEN (hex)\r\n");
+                //UART_PutString("Please, send GREEN (hex)\r\n");
                 break;
         
             case GREEN:
                 buffer[state-1] = check;
-                UART_PutString("Please, send BLUE (hex)\r\n");
+                //UART_PutString("Please, send BLUE (hex)\r\n");
                 break;
             
             case BLUE:
                 buffer[state-1] = check;
-                UART_PutString("Please, send tail byte\r\n");
+                //UART_PutString("Please, send tail byte\r\n");
                 break;
            
             case TAIL:
@@ -112,7 +122,7 @@ void acquire_byte(uint8 *buffer) {
                     state = IDLE;
                 }
                 else {
-                    UART_PutString("Tail byte not correct. Re-send packet\r\n");
+                    //UART_PutString("Tail byte not correct. Re-send packet\r\n");
                     // Reset the buffer
                     buffer[0] = 0;
                     buffer[1] = 0;

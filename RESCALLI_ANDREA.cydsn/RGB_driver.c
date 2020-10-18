@@ -1,11 +1,22 @@
 /* ========================================
  *
- * Copyright YOUR COMPANY, THE YEAR
+ * Copyright LTEBS srl, 2020
  * All Rights Reserved
  * UNPUBLISHED, LICENSED SOFTWARE.
  *
  * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
+ * WHICH IS THE PROPERTY OF LTEBS srl.
+ *
+ * \file  RGB_driver.c
+ * \brief Driver file for the Assignment_3 that sets the PWM of the RGB LED channels
+ *        according to the acquired data
+ *
+ * Sets the colour of an (external) RGB LED according to a packet of data sent to the PSoC.
+ * UART_PutString commands are commented so that the code can work with the GUI. If PSoC is piloted
+ * with CoolTerm, they can be un-commented and they guide the user throughout the procedure.
+ *
+ * \author: Andrea Rescalli
+ * \date:   20/10/2020
  *
  * ========================================
 */
@@ -38,9 +49,9 @@
 extern uint8 flag_packet;
 extern uint8 state;
 
-char red_val[25] = {'\0'};
-char green_val[25] = {'\0'};
-char blue_val[25] = {'\0'};
+//char red_val[25] = {'\0'};
+//char green_val[25] = {'\0'};
+//char blue_val[25] = {'\0'};
 
 
 
@@ -56,27 +67,27 @@ void pilot_pwm(uint8 *buffer) {
          * in this way we put the PWM all HIGH and the RGB channel is always off).
         */
         
-        UART_PutString("\r\n");
-        UART_PutString("---------------------------\r\n");
-        UART_PutString("\r\n");
-        UART_PutString("RGB updated:\r\n");
-        sprintf(red_val, "RED:    %i\r\n", buffer[1]);
-        UART_PutString(red_val);
+        //UART_PutString("\r\n");
+        //UART_PutString("---------------------------\r\n");
+        //UART_PutString("\r\n");
+        //UART_PutString("RGB updated:\r\n");
+        //sprintf(red_val, "RED:    %i\r\n", buffer[1]);
+        //UART_PutString(red_val);
         
         // Pilot RED PWM
         PWM_Red_WriteCompare(255 - buffer[1]);
 
-        sprintf(green_val, "GREEN:  %i\r\n", buffer[2]);
-        UART_PutString(green_val);
+        //sprintf(green_val, "GREEN:  %i\r\n", buffer[2]);
+        //UART_PutString(green_val);
         
         // Pilot GREEN PWM
         PWM_Green_WriteCompare(255 - buffer[2]);
 
-        sprintf(blue_val, "BLUE:   %i\r\n", buffer[3]);
-        UART_PutString(blue_val);
-        UART_PutString("\r\n");
-        UART_PutString("---------------------------\r\n");
-        UART_PutString("\r\n");
+        //sprintf(blue_val, "BLUE:   %i\r\n", buffer[3]);
+        //UART_PutString(blue_val);
+        //UART_PutString("\r\n");
+        //UART_PutString("---------------------------\r\n");
+        //UART_PutString("\r\n");
         
         // Pilot BLUE PWM
         PWM_Blue_WriteCompare(255 - buffer[3]);
@@ -89,7 +100,7 @@ void pilot_pwm(uint8 *buffer) {
         buffer[3] = 0;
         buffer[4] = 0;
         state = IDLE;
-        UART_PutString("Please, send header byte\r\n");
+        //UART_PutString("Please, send header byte\r\n");
         
     }
 
