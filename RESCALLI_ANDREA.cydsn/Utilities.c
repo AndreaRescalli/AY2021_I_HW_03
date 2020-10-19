@@ -23,8 +23,7 @@
 // Includes
 #include "Utilities.h"
 #include "Timer.h"
-#include "PWM_Red.h"
-#include "PWM_Green.h"
+#include "PWM_Red_and_Green.h"
 #include "PWM_Blue.h"
 
 // Globals
@@ -48,8 +47,7 @@ void reset_timer(void) {
 void PWM_Start(void) {
 
     // Start each RGB channel's PWM
-    PWM_Red_Start();
-    PWM_Green_Start();
+    PWM_Red_and_Green_Start();
     PWM_Blue_Start();
 
 } // end PWM_Start

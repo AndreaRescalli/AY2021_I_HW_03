@@ -75,13 +75,13 @@ void pilot_pwm(uint8 *buffer) {
         //UART_PutString(red_val);
         
         // Pilot RED PWM
-        PWM_Red_WriteCompare(255 - buffer[1]);
+        PWM_Red_and_Green_WriteCompare1(255 - buffer[1]);
 
         //sprintf(green_val, "GREEN:  %i\r\n", buffer[2]);
         //UART_PutString(green_val);
         
         // Pilot GREEN PWM
-        PWM_Green_WriteCompare(255 - buffer[2]);
+        PWM_Red_and_Green_WriteCompare2(255 - buffer[2]);
 
         //sprintf(blue_val, "BLUE:   %i\r\n", buffer[3]);
         //UART_PutString(blue_val);
