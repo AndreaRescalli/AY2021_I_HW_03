@@ -12,7 +12,8 @@
  *
  * Sets the colour of an (external) RGB LED according to a packet of data sent to the PSoC.
  * UART_PutString commands are commented so that the code can work with the GUI. If PSoC is piloted
- * with CoolTerm, they can be un-commented and they guide the user throughout the procedure.
+ * with CoolTerm, they can be un-commented and they guide the user throughout the procedure (in this case
+ * a byte-per-byte sending is required, since the PutString task would not allow to catch the packet properly in time)
  *
  * \author: Andrea Rescalli
  * \date:   20/10/2020
@@ -72,7 +73,7 @@ void acquire_byte(uint8 *buffer) {
         //sprintf(recieved, "Byte recieved: %i\r\n", check);
         //UART_PutString(recieved);
         
-        // Special character can be typed at any time
+        // Special character for GUI can be typed at any time
         if(check == 'v') {
             // Reset the buffer
             buffer[0] = 0;
@@ -117,7 +118,9 @@ void acquire_byte(uint8 *buffer) {
            
             case TAIL:
                 if(check == TAIL_BYTE) {
+                    // We accept the byte
                     buffer[state-1] = check;
+                    // We communicate we've acquired the full packet and we go back to IDLE
                     flag_packet = 1;
                     state = IDLE;
                 }
